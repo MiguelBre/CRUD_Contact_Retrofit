@@ -2,6 +2,7 @@ package br.senai.sp.jandira.contact_retrofit
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.senai.sp.jandira.contact_retrofit.api.ContactCall
@@ -42,6 +44,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(name: String) {
+
+    val context = LocalContext.current
 
     var nameState by remember {
         mutableStateOf("")
@@ -146,13 +150,30 @@ fun Greeting(name: String) {
                             emailState = it.email
                             phoneState = it.phone
                             activeState = it.active
-                                   },
+                        },
                     backgroundColor = Color(0, 188, 212, 255)
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(text = it.name)
                         Text(text = it.email)
                         Text(text = it.phone)
+                        Button(onClick = {
+                            val callContactDelete = contactsCall.delete(it.id)
+                            callContactDelete.enqueue(object : Callback<Boolean> {
+                                override fun onResponse(
+                                    call: Call<Boolean>,
+                                    response: Response<Boolean>
+                                ) {
+                                    Toast.makeText(context, response.code().toString(), Toast.LENGTH_SHORT).show()
+                                }
+
+                                override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                    TODO("Not yet implemented")
+                                }
+                            })
+                        }) {
+                            Text(text = "Delete")
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.padding(10.dp))
